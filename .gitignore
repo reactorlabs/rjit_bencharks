@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Rds
+data/
+rsconnect/
+.httr-oauth
+droptoken.rds
+.Rapp.history
