@@ -8,7 +8,7 @@ shinyServer(function(input, output, session) {
         package <- input$ipackage
         pc <- processed_data[[package]]$total
         function_names <<- names(processed_data[[package]]$functions)
-        updateSelectInput(session, "ifunction", choices = names(function_data))
+        updateSelectInput(session, "ifunction", choices = function_names)
         barplot(sapply(pc, function(x) as.numeric(x[[2]], units="secs")),
                 ylab="time (seconds)",
                 xlab="date (commit)",
