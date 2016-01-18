@@ -36,13 +36,21 @@ load_data_dropbox <- function() {
             data[[package]][["total"]] <- c(data[[package]][["total"]], d)
         }
     }
-    data
+    processed_data <- list()
+    for (pname in names(data)) {
+        processed_data[[pname]]$total <- process_package(data[[pname]]$total)
+        for (fname in names(data[[pname]]$functions)) {
+            processed_data[[pname]]$functions[[fname]] <- 
+                process_function(data[[pname]]$functions[[fname]])
+        }
+    }
+    processed_data
 }
 
-process_package <- function(pname) {
-    package_compilation <- benchmark_data[[pname]]$total
-    package_compilation <- package_compilation[order(sapply(package_compilation, `[[`, 1))]
-    pc <- package_compilation
+process_package <- function(pc) {
+    # pc - package compilation
+    # rn - rownames
+    pc <- pc[order(sapply(pc, `[[`, 1))]
     rn <- names(pc)
     rn <- sapply(1:length(rn), function(i) paste(format(as.Date(pc[[i]][[1]]), "%d/%m/%Y"), 
                                                  "(",
@@ -53,10 +61,10 @@ process_package <- function(pname) {
     pc
 }
 
-process_function <- function(func) {
-    funcd <- function_data[[func]]
-    funcd <- funcd[order(sapply(funcd, `[[`, 1))]
-    fd <- funcd
+process_function <- function(fd) {
+    # funcd - function data
+    # rn - rownames
+    fd <- fd[order(sapply(fd, `[[`, 1))]
     rn <- names(fd)
     rn <- sapply(1:length(rn), function(i) paste(format(as.Date(fd[[i]][[1]]), "%d/%m/%Y"),
                                                  "(",
@@ -69,5 +77,5 @@ process_function <- function(func) {
 }
 
 data_path <- "~/rjit_data"
-benchmark_data <- load_data_dropbox()
-function_data <- list()
+processed_data <- load_data_dropbox()
+function_names <- names(processed_data$base$functions)

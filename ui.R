@@ -9,10 +9,10 @@ shinyUI(navbarPage("RJIT benchmarks",
     tabPanel("Compilation",
             sidebarPanel(
                  selectInput("ipackage", "Package:",
-                             choices=names(benchmark_data), selectize = FALSE),
+                             choices=names(processed_data), selectize = FALSE),
                  hr(),
                  selectInput("ifunction", "Function:",
-                             choices=names(function_data), 
+                             choices=function_names, 
                              selectize = FALSE, 
                              selected="parse"),
                  hr()
