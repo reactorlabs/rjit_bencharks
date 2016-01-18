@@ -1,21 +1,26 @@
 library(rdrop2)
 
 load_data_dropbox <- function() {
-    # token <- readRDS("droptoken.rds")
-    # drop_acc(dtoken = token)
-    data <- list(base=list(total=list(), functions=list()))
-    if (!dir.exists("data")) dir.create("data")
-    # wercker_files <- drop_dir('/Apps/rjit_uploader/temp/')
-    wercker_files <- list.files("data")
-    res <- sapply(as.vector(as.matrix(wercker_files)),
+    # load saved dropbox token
+    token <- readRDS("droptoken.rds")
+    drop_acc(dtoken = token)
+    
+    # get files and download them to data_path
+    if (!dir.exists(data_path)) dir.create(data_path)
+    wercker_files <- as.vector(as.matrix(drop_dir('/Apps/rjit_uploader/wercker'))[,1])
+    res <- sapply(wercker_files,
                   function(file) {
-                      local_file <- file.path("data", basename(file))
-                      # if (!file.exists(local_file)) drop_get(as.character(file),
-                      #                                        local_file)
+                      local_file <- file.path(data_path, basename(file))
+                      if (!file.exists(local_file)) drop_get(as.character(file), local_file)
                       local_file
                   }
     )
-    
+   
+    # process downloaded files
+    # files are of 2 formats:
+    #    * (package)_functions_(commit_id).Rds - with compilation information on per function basis
+    #    * (package)_package_(commit_id).Rds - with compilation information for the whole package
+    data <- list(base=list(total=list(), functions=list()))
     for (file in res) {
         commit <- gsub(".*_([0-9a-f]{5,40})\\.Rds$", "\\1", file)
         package <- gsub(".*/(.*)_(.*)_([0-9a-f]{5,40})\\.Rds$", "\\1", file)
@@ -63,5 +68,6 @@ process_function <- function(func) {
     fd
 }
 
+data_path <- "~/rjit_data"
 benchmark_data <- load_data_dropbox()
 function_data <- list()
