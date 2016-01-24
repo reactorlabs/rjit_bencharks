@@ -1,5 +1,8 @@
 library(rdrop2)
 
+source("run_bench.R")
+data_path <- "~/rjit_data"
+
 load_data_dropbox <- function() {
     # load saved dropbox token
     token <- readRDS("droptoken.rds")
@@ -7,21 +10,40 @@ load_data_dropbox <- function() {
     
     # get files and download them to data_path
     if (!dir.exists(data_path)) dir.create(data_path)
-    wercker_files <- as.vector(as.matrix(drop_dir('/Apps/rjit_uploader/wercker'))[,1])
-    res <- sapply(wercker_files,
+    if (!dir.exists(file.path(data_path, "compilation"))) dir.create(file.path(data_path, "compilation"))
+    if (!dir.exists(file.path(data_path, "execution"))) dir.create(file.path(data_path, "execution"))
+                                                                   
+    wercker_files_compilation <- as.vector(as.matrix(drop_dir('/Apps/rjit_uploader/wercker/compilation'))[,1])
+    files <- sapply(wercker_files_compilation,
                   function(file) {
-                      local_file <- file.path(data_path, basename(file))
+                      local_file <- file.path(data_path, "compilation", basename(file))
                       if (!file.exists(local_file)) drop_get(as.character(file), local_file)
                       local_file
                   }
     )
-   
+    
+    processed_compilation_data <- process_compilation_data(files)
+    
+    wercker_files_execution <- as.vector(as.matrix(drop_dir('/Apps/rjit_uploader/wercker/execution'))[,1])
+    files <- sapply(wercker_files_execution,
+                  function(file) {
+                      local_file <- file.path(data_path, "execution", basename(file))
+                      if (!file.exists(local_file)) drop_get(as.character(file), local_file)
+                      local_file
+                  }
+    )
+    
+    processed_execution_data <- process_execution_data(files)
+    list(compilation=processed_compilation_data, execution=processed_execution_data)
+}
+
+process_compilation_data <- function(files) {
     # process downloaded files
     # files are of 2 formats:
     #    * (package)_functions_(commit_id).Rds - with compilation information on per function basis
     #    * (package)_package_(commit_id).Rds - with compilation information for the whole package
     data <- list(base=list(total=list(), functions=list()))
-    for (file in res) {
+    for (file in files) {
         commit <- gsub(".*_([0-9a-f]{5,40})\\.Rds$", "\\1", file)
         package <- gsub(".*/(.*)_(.*)_([0-9a-f]{5,40})\\.Rds$", "\\1", file)
         if (grepl("functions", file)) {
@@ -76,6 +98,5 @@ process_function <- function(fd) {
     fd
 }
 
-data_path <- "~/rjit_data"
 processed_data <- load_data_dropbox()
-function_names <- names(processed_data$base$functions)
+function_names <- names(processed_data$compilation$base$functions)

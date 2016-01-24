@@ -9,7 +9,7 @@ shinyUI(navbarPage("RJIT benchmarks",
     tabPanel("Compilation",
             sidebarPanel(
                  selectInput("ipackage", "Package:",
-                             choices=names(processed_data), selectize = FALSE),
+                             choices=names(processed_data$compilation), selectize = FALSE),
                  hr(),
                  selectInput("ifunction", "Function:",
                              choices=function_names, 
@@ -18,12 +18,19 @@ shinyUI(navbarPage("RJIT benchmarks",
                  hr()
             ),
             mainPanel(
-                 plotOutput("packageTimes"),
-                 plotOutput("functionTimes")
+                 plotOutput("compilationPackageTimes"),
+                 plotOutput("compilationFunctionTimes")
             )
     ),
-    tabPanel("Execution"
-        # dataTableOutput('mytable')
+    tabPanel("Execution",
+             sidebarPanel(
+                 selectInput("iexecution_date", "Date",
+                             choices=names(processed_data$execution), selectize = FALSE),
+                 hr()
+             ),
+             mainPanel(
+                 plotOutput("executionSummary")
+             )
     )
 )
 )
