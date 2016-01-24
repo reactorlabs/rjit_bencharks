@@ -12,7 +12,7 @@ shinyUI(navbarPage("RJIT benchmarks",
                              choices=names(processed_data$compilation), selectize = FALSE),
                  hr(),
                  selectInput("ifunction", "Function:",
-                             choices=function_names, 
+                             choices=names(processed_data$compilation$base$functions), 
                              selectize = FALSE, 
                              selected="parse"),
                  hr()

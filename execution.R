@@ -1,3 +1,19 @@
+process_execution_data <- function(files) {
+    names(files) <- NULL
+    dates <- vector()
+    class(dates) <- "POSIXct"
+    for (file in files) {
+        date <- as.POSIXct(sub(".*(\\d{2}-\\d{2}-\\d{2}_\\d{4}-\\d{2}-\\d{2})_.*$", "\\1", file), format = "%H-%M-%S_%F")
+        dates <- c(dates, date)
+    }
+    commits <- sapply(files, function(x) substr(sub(".*([a-f0-9]{40}).*$", "\\1", x), 0, 7), USE.NAMES = FALSE)
+    data <- lapply(files, calclog)
+    names(data) <- sapply(1:length(files), function(i) date_commit=sprintf("%s(%s)", 
+                                                                 strftime(dates[i], "%m/%d/%y %H:%M:%S"),
+                                                                          commits[i]))
+    data[order(dates)]
+}
+
 calclog <- function(fileNames){
     
     #opening file of the name:fileNames
@@ -124,21 +140,6 @@ calclog <- function(fileNames){
     medNR
 }
 
-process_execution_data <- function(files) {
-    names(files) <- NULL
-    dates <- vector()
-    class(dates) <- "POSIXct"
-    for (file in files) {
-        date <- as.POSIXct(sub(".*(\\d{2}-\\d{2}-\\d{2}_\\d{4}-\\d{2}-\\d{2})_.*$", "\\1", file), format = "%H-%M-%S_%F")
-        dates <- c(dates, date)
-    }
-    commits <- sapply(files, function(x) substr(sub(".*([a-f0-9]{40}).*$", "\\1", x), 0, 7), USE.NAMES = FALSE)
-    data <- lapply(files, calclog)
-    names(data) <- sapply(1:length(files), function(i) date_commit=sprintf("%s(%s)", 
-                                                                 strftime(dates[i], "%m/%d/%y %H:%M:%S"),
-                                                                          commits[i]))
-    data[order(dates)]
-}
 
 graphlog <- function(medNR, name) {
     graphn <- ggplot() + geom_pointrange(data=medNR, mapping=aes(x=name, y=median_time, ymin=top_quantile, ymax=bottom_quantile), size=0.6, color="blue", fill="white", shape=20) + 
