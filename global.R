@@ -22,7 +22,7 @@ load_data_dropbox <- function() {
     list(compilation=processed_compilation_data, execution=processed_execution_data)
 }
 
-download_files <- function(type, ci="wercker") {
+download_files <- function(type, ci="teamcity") {
     if (!dir.exists(file.path(data_path, type))) dir.create(file.path(data_path, type))
     
     wercker_files_compilation <- as.vector(as.matrix(drop_dir(sprintf('/Apps/rjit_uploader/%s/%s', ci, type)))[,1])
